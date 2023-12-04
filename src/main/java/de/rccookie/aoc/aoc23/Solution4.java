@@ -29,8 +29,8 @@ public class Solution4 extends Solution {
     IntStream matchCounts() {
         return lines.mapToInt(line -> {
             String[] parts = line.split("\\s*[:|]\\s*");
-            Set<Integer> winning = Arrays.stream(parts[1].split("\\s+")).map(Integer::parseInt).collect(Collectors.toSet());
-            return (int) Arrays.stream(parts[2].split("\\s+")).map(Integer::parseInt).filter(winning::contains).count();
+            Set<String> winning = Arrays.stream(parts[1].split("\\s+")).collect(Collectors.toSet());
+            return (int) Arrays.stream(parts[2].split("\\s+")).filter(winning::contains).count();
         });
     }
 }
