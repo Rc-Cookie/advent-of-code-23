@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import de.rccookie.aoc.Solution;
 import de.rccookie.math.Mathf;
@@ -11,11 +13,16 @@ import de.rccookie.math.Mathf;
 public class Solution5 extends Solution {
 
     @Override
+    public void load() {
+        //noinspection ResultOfMethodCallIgnored
+        Mathf.max();
+    }
+
+    @Override
     public Object task1() {
         long[] values = Arrays.stream(linesArr[0].split("\\s+")).skip(1).mapToLong(Long::parseLong).toArray();
-        RangeMap[] maps = split("\n\n").skip(1).map(RangeMap::parse).toArray(RangeMap[]::new);
 
-        for(RangeMap map : maps)
+        for(RangeMap map : RangeMap.parseAll(input))
             for(int i=0; i<values.length; i++)
                 values[i] = map.map(values[i]);
 
@@ -24,16 +31,42 @@ public class Solution5 extends Solution {
 
     @Override
     public Object task2() {
-        List<long[]> valueRanges = new ArrayList<>();
+        // Store the ranges sorted by starting point; we need them sorted in order to join overlapping ranges
+        Queue<long[]> valueRanges = new PriorityQueue<>(Comparator.comparingLong(r -> r[0]));
+        // Store the seed ranges
         String[] parts = linesArr[0].split("\\s+");
-        for(int i=1; i<parts.length; i+=2)
-            valueRanges.add(new long[] { Long.parseLong(parts[i]), Long.parseLong(parts[i]) + Long.parseLong(parts[i+1]) });
+        for(int i = 1; i < parts.length; i += 2) {
+            long start = Long.parseLong(parts[i]), len = Long.parseLong(parts[i + 1]);
+            valueRanges.add(new long[]{start, start + len});
+        }
 
-        RangeMap[] maps = split("\n\n").skip(1).map(RangeMap::parse).toArray(RangeMap[]::new);
+        // Temporary swap storage used to store the joined ranges
+        List<long[]> combined = new ArrayList<>();
 
-        for(RangeMap map : maps)
-            valueRanges = valueRanges.stream().flatMap(r -> map.mapRange(r[0], r[1]).stream()).toList();
+        // Map ranges layer by layer (first map all over first map, then all over the second, etc.). This way allows to
+        // optimize overlapping ranges away
+        for(RangeMap map : RangeMap.parseAll(input)) {
 
+            // Join overlapping ranges to prevent unnecessary duplicate calculation
+            combined.clear();
+            long[] current = valueRanges.remove();
+            while(!valueRanges.isEmpty()) {
+                long[] range = valueRanges.remove();
+                if(range[0] <= current[1])
+                    current[1] = Math.max(current[1], range[1]);
+                else {
+                    combined.add(current);
+                    current = range;
+                }
+            }
+            combined.add(current);
+
+            // Calculate mapping for all combined ranges and add them back to the ranges queue
+            for(long[] range : combined)
+                valueRanges.addAll(map.mapRange(range[0], range[1]));
+        }
+
+        // Find the lowest range by starting value
         return Mathf.minL(valueRanges, r -> r[0]);
     }
 
@@ -58,6 +91,7 @@ public class Solution5 extends Solution {
 
             if(start == end) return List.of();
 
+            // Binary search for lowest range that the range starts in / after
             int low = 0, high = rangeStarts.length;
             int i = -1;
             while(low != high) {
@@ -69,15 +103,14 @@ public class Solution5 extends Solution {
                 else high = i;
             }
 
-//            int i = rangeStarts.length - 1;
-//            while(rangeStarts[i] > start) i--;
-
             List<long[]> mappedRanges = new ArrayList<>();
             while(true) {
                 if(start < rangeEnds[i]) {
+                    // This means that the range is starting within an actively defined range (which maps to a specific other range)
                     long mappedStart = targetStarts[i] + (start - rangeStarts[i]);
 
                     if(end <= rangeEnds[i]) {
+                        // The range fully lays within this range, all ranges mapped
                         mappedRanges.add(new long[]{ mappedStart, mappedStart + (end - start) });
                         return mappedRanges;
                     }
@@ -86,13 +119,16 @@ public class Solution5 extends Solution {
                     start += mappedLen;
                 }
                 else {
+                    // This means that the range does not start within an actively defined range and is mapped to itself
                     long rangeEnd = i == rangeStarts.length - 1 ? Long.MAX_VALUE : rangeStarts[i+1];
                     if(rangeEnd == rangeEnds[i]) {
+                        // The last range and the next range are touching each other, thus the "passive" range in between is empty
                         i++;
                         continue;
                     }
 
                     if(end <= rangeEnd) {
+                        // The range fully lays within this "passive" range, all ranges mapped
                         mappedRanges.add(new long[] { start, end });
                         return mappedRanges;
                     }
@@ -103,29 +139,43 @@ public class Solution5 extends Solution {
             }
         }
 
-        static RangeMap parse(String str) {
-            List<long[]> rangeMaps = new ArrayList<>();
-            str.lines().skip(1).forEach(line -> {
-                String[] parts = line.split("\\s+");
-                rangeMaps.add(new long[]{
-                        Long.parseLong(parts[0]),
-                        Long.parseLong(parts[1]),
-                        Long.parseLong(parts[2])
-                });
-            });
-            rangeMaps.add(new long[] { -1, -1, 0 }); // Always have a low enough range
+        static RangeMap[] parseAll(String str) {
+            // There are exactly 7 maps, as they have specific names
+            RangeMap[] maps = new RangeMap[7];
 
-            rangeMaps.sort(Comparator.comparingLong(a -> a[1]));
+            // Don't use String.split() (very slow) or a reader (still slower) to avoid creating
+            // unnecessary copies of the string (and because compiling a regex is slow)
 
-            long[] rangeStarts = new long[rangeMaps.size()];
-            long[] rangeEnds = new long[rangeMaps.size()];
-            long[] targetStarts = new long[rangeMaps.size()];
-            for(int i = 0; i < rangeMaps.size(); i++) {
-                rangeStarts[i] = rangeMaps.get(i)[1];
-                rangeEnds[i] = rangeStarts[i] + rangeMaps.get(i)[2];
-                targetStarts[i] = rangeMaps.get(i)[0];
+            int pos = str.indexOf('\n', str.indexOf('\n') + 1) + 1;
+            for(int k=0; k<maps.length; k++) {
+                pos = str.indexOf('\n', pos) + 1;
+
+                Queue<long[]> rangeMaps = new PriorityQueue<>(Comparator.comparingLong(r -> r[1]));
+                // Add a lowest range so there is no need to always test for the lower bounds and there is no special case for it
+                rangeMaps.add(new long[] { -1, -1, 0 });
+                int eol = str.indexOf('\n', pos);
+                while(eol - pos > 2) {
+                    rangeMaps.add(new long[] {
+                            Long.parseLong(str, pos, pos = str.indexOf(' ', pos), 10),
+                            Long.parseLong(str, ++pos, pos = str.indexOf(' ', pos), 10),
+                            Long.parseLong(str, ++pos, pos = eol, 10)
+                    });
+                    eol = str.indexOf('\n', ++pos);
+                }
+                pos = eol + 1;
+
+                long[] rangeStarts = new long[rangeMaps.size()];
+                long[] rangeEnds = new long[rangeMaps.size()];
+                long[] targetStarts = new long[rangeMaps.size()];
+                for(int i=0; !rangeMaps.isEmpty(); i++) {
+                    long[] range = rangeMaps.remove();
+                    rangeStarts[i] = range[1];
+                    rangeEnds[i] = rangeStarts[i] + range[2];
+                    targetStarts[i] = range[0];
+                }
+                maps[k] = new RangeMap(rangeStarts, rangeEnds, targetStarts);
             }
-            return new RangeMap(rangeStarts, rangeEnds, targetStarts);
+            return maps;
         }
     }
 }
