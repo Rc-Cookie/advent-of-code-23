@@ -8,7 +8,7 @@ commonly used helper functions. Feel free to check it out yourself if you are us
 
 ## Performance
 
-Some performance stats, which have been obtained using `--all --repeat 100`:
+Some performance stats, which have been obtained using `--all --repeat 100` on my AMD Ryzen 9 5950x:
 
 ```
 Duration (average of 100 runs): 20.69003ms
