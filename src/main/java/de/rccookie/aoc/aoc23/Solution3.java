@@ -1,54 +1,78 @@
 package de.rccookie.aoc.aoc23;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import de.rccookie.aoc.Solution;
-import de.rccookie.math.IRect;
-import de.rccookie.math.Mathf;
-import de.rccookie.math.collision.BVH2;
-import de.rccookie.math.collision.Data2D;
-import de.rccookie.math.float2;
 
 public class Solution3 extends Solution {
 
-    private static final Pattern NUMBER = Pattern.compile("\\d+");
-
     @Override
     public Object task1() {
-        BVH2<float2> symbols = symbols(c -> true);
-        symbols.rebuild();
-        return Mathf.sum(numbers(), n -> symbols.query(n).findAny().isPresent() ? n.data : 0);
+        int sum = 0;
+        for(int i=0; i<charTable.length; i++) {
+            int num = 0;
+            boolean last = false;
+            for(int j=0; j<charTable[i].length; j++) {
+                char c = charTable[i][j];
+                if(c >= '0' && c <= '9') {
+                    num = 10 * num + (c - '0');
+                    if(last || (i != 0 && charTable[i-1][j] != '.') || (i != charTable.length-1 && charTable[i+1][j] != '.')) {
+                        while(++j < charTable[i].length && (c = charTable[i][j]) >= '0' && c <= '9')
+                            num = 10 * num + (c - '0');
+                        sum += num;
+                        num = 0;
+                    }
+                    last = false;
+                }
+                else {
+                    last = (c != '.' || (i != 0 && charTable[i-1][j] != '.') || (i != charTable.length-1 && charTable[i+1][j] != '.'));
+                    if(last)
+                        sum += num;
+                    num = 0;
+                }
+            }
+        }
+        return sum;
     }
 
+    @SuppressWarnings("ExtractMethodRecommender")
     @Override
     public Object task2() {
-        BVH2<Data2D<IRect, Integer>> numbers = numbers();
-        numbers.rebuild();
-        return Mathf.sum(symbols(c -> c == '*'), g -> {
-            List<Data2D<IRect, Integer>> nums = numbers.query(g).limit(3).toList();
-            return nums.size() == 2 ? nums.get(0).data * nums.get(1).data : 0;
-        });
-    }
-
-    private BVH2<Data2D<IRect, Integer>> numbers() {
-        BVH2<Data2D<IRect, Integer>> numbers = new BVH2<>();
-        for(int i=0; i<linesArr.length; i++) {
-            Matcher m = NUMBER.matcher(linesArr[i]);
-            while(m.find())
-                numbers.insert(new Data2D<>(new IRect(m.start() - 1, i - 1, m.end() + 1, i + 2), Integer.parseInt(m.group())));
+        // Add padding around table to prevent the need of bounds checks -> >10% faster
+        short[][] numLookup = new short[charTable.length+2][charTable[0].length+2];
+        for(int i=0; i<charTable.length; i++) {
+            int num = 0;
+            int numCount = 0;
+            for(int j=0; j<charTable[i].length; j++) {
+                char c = charTable[i][j];
+                if(c >= '0' && c <= '9') {
+                    num = 10 * num + (c - '0');
+                    numCount++;
+                }
+                else {
+                    for(int k=0; k<numCount; k++)
+                        numLookup[i+1][j-k] = (short) num;
+                    numCount = 0;
+                    num = 0;
+                }
+            }
+            for(int k=0; k<numCount; k++)
+                numLookup[i+1][charTable[i].length - k] = (short) num;
         }
-        return numbers;
-    }
 
-    private BVH2<float2> symbols(Predicate<Character> filter) {
-        BVH2<float2> symbols = new BVH2<>();
-        for(int i=0; i<linesArr.length; i++)
-            for(int j=0; j<linesArr[i].length(); j++)
-                if(linesArr[i].charAt(j) != '.' && (linesArr[i].charAt(j) < '0' || linesArr[i].charAt(j) > '9') && filter.test(linesArr[i].charAt(j)))
-                    symbols.insert(new float2(j,i).add(0.5f));
-        return symbols;
+        int sum = 0;
+        for(int i=0; i<charTable.length; i++) {
+            gearLoop: for(int j=0; j<charTable[i].length; j++) {
+                if(charTable[i][j] != '*') continue;
+                short a = 0, b = 0;
+                for(int k=0; k<3; k++) for(int l=0; l<3; l++) {
+                    short x = numLookup[i+k][j+l];
+                    if(x == 0 || a == x) continue;
+                    if(a == 0) a = x;
+                    else if(b == 0) b = x;
+                    else if(b != x) continue gearLoop;
+                }
+                sum += a * b;
+            }
+        }
+        return sum;
     }
 }
