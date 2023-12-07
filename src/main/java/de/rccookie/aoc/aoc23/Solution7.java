@@ -1,9 +1,6 @@
 package de.rccookie.aoc.aoc23;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 import de.rccookie.aoc.Solution;
 
@@ -11,23 +8,15 @@ public class Solution7 extends Solution {
 
     @Override
     public Object task1() {
-        long sum = 0;
-//        List<Hand> hands = new ArrayList<>();
-        List<long[]> hands = new ArrayList<>();
-        for(String line : linesArr) {
-            String[] parts = line.split(" ");
-//            hands.add(new Hand(parts[0], type(parts[0]), Integer.parseInt(parts[1])));
-            hands.add(new long[] { value1(parts[0]), Long.parseLong(parts[1]) });
-        }
-//        hands.sort((a,b) -> {
-//            if(a.type != b.type)
-//                return -Long.compare(a.type, b.type);
-//
-//        });
-        hands.sort(Comparator.comparingLong(h -> h[0]));
-        for(int i=0; i<hands.size(); i++)
-            sum += (i + 1) * hands.get(i)[1];
+        long[] hands = new long[linesArr.length];
 
+        for(int i=0; i<hands.length; i++)
+            hands[i] = value1(linesArr[i]) << 16 | Long.parseLong(linesArr[i], 6, linesArr[i].length(), 10);
+        Arrays.sort(hands);
+
+        long sum = 0;
+        for(int i=0; i<hands.length; i++)
+            sum += (i+1) * (hands[i] & 0xFFFF);
         return sum;
     }
 
@@ -44,7 +33,7 @@ public class Solution7 extends Solution {
 
     private static int type1(String hand) {
         int[] counts = new int[13];
-        for(int i=0; i<hand.length(); i++)
+        for(int i=0; i<5; i++)
             counts[value1(hand.charAt(i))]++;
         Arrays.sort(counts);
 
@@ -74,12 +63,8 @@ public class Solution7 extends Solution {
     public Object task2() {
         long[] hands = new long[linesArr.length];
 
-        for(int i=0; i<hands.length; i++) {
-            String[] parts = linesArr[i].split(" ");
-            hands[i] = value2(parts[0]) << 16 | Long.parseLong(parts[1]);
-            if(hands[i] >> 16 != value2(parts[0]) || (hands[i] & 0xFFFF) != Long.parseLong(parts[1]))
-                throw new AssertionError();
-        }
+        for(int i=0; i<hands.length; i++)
+            hands[i] = value2(linesArr[i]) << 16 | Long.parseLong(linesArr[i], 6, linesArr[i].length(), 10);
         Arrays.sort(hands);
 
         long sum = 0;
