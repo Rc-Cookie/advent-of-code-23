@@ -11,21 +11,23 @@ commonly used helper functions. Feel free to check it out yourself if you are us
 Some performance stats, which have been obtained using `--all --repeat 100` on my AMD Ryzen 9 5950x:
 
 ```
-Duration (average of 100 runs): 20.69003ms
+Duration (average of 100 runs): 23.191598ms
 
 ┌───────╥─────────┬─────────┐
 │       ║  Task 1 │  Task 2 │
 ╞═══════╬═════════╪═════════╡
-│ Day 1 ║ 0.466ms │ 0.768ms │
+│ Day 1 ║ 0.523ms │ 1.235ms │
 ├───────╫─────────┼─────────┤
-│ Day 2 ║ 1.001ms │ 0.867ms │
+│ Day 2 ║ 1.395ms │ 0.602ms │
 ├───────╫─────────┼─────────┤
-│ Day 3 ║ 7.552ms │ 7.767ms │
+│ Day 3 ║ 7.899ms │ 8.311ms │
 ├───────╫─────────┼─────────┤
-│ Day 4 ║ 1.010ms │ 0.891ms │
+│ Day 4 ║ 1.263ms │ 0.984ms │
 ├───────╫─────────┼─────────┤
-│ Day 5 ║ 0.150ms │ 0.210ms │
+│ Day 5 ║ 0.194ms │ 0.216ms │
 ├───────╫─────────┼─────────┤
-│ Day 6 ║ 0.005ms │ 0.002ms │
+│ Day 6 ║ 0.007ms │ 0.003ms │
+├───────╫─────────┼─────────┤
+│ Day 7 ║ 0.262ms │ 0.298ms │
 └───────╨─────────┴─────────┘
 ```
