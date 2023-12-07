@@ -1,36 +1,59 @@
 package de.rccookie.aoc.aoc23;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import de.rccookie.aoc.Solution;
-import de.rccookie.math.Mathf;
 
+@SuppressWarnings("DuplicatedCode")
 public class Solution4 extends Solution {
 
     @Override
     public Object task1() {
-        return matchCounts().map(c -> c == 0 ? 0 : 1 << (c-1)).sum();
+        int winStart = input.indexOf(':') + 1;
+        int winEnd = input.indexOf('|', winStart + 3) - 1;
+        int lineLen = input.indexOf('\n', winEnd + 4) + 1;
+        int numWidth = 2;
+        while(input.charAt(winStart + numWidth) == ' ') numWidth++;
+        numWidth++;
+        while(input.charAt(winStart + numWidth) != ' ') numWidth++;
+        int numStart = winEnd + 2;
+        int numCount = (lineLen - numStart) / numWidth;
+
+        int sum = 0;
+        for(int i = 0; i < input.length() / lineLen; i++) {
+            int count = 0;
+            for(int j=0; j<numCount; j++)
+                if(input.indexOf(input.substring(i*lineLen + numStart + j * numWidth, i*lineLen + numStart + (j+1) * numWidth), i*lineLen + winStart, i*lineLen + winEnd) != -1)
+                    count++;
+            if(count != 0)
+                sum += 1 << (count-1);
+        }
+        return sum;
     }
 
     @Override
     public Object task2() {
-        int[] matchCounts = matchCounts().toArray();
-        int[] counts = new int[matchCounts.length];
-        Arrays.fill(counts, 1);
-        for(int i=0; i<counts.length-1; i++)
-            for(int j=0; j<matchCounts[i]; j++)
-                counts[i+j+1] += counts[i];
-        return Mathf.sum(counts);
-    }
 
-    IntStream matchCounts() {
-        return lines.mapToInt(line -> {
-            String[] parts = line.split("\\s*[:|]\\s*");
-            Set<String> winning = Arrays.stream(parts[1].split("\\s+")).collect(Collectors.toSet());
-            return (int) Arrays.stream(parts[2].split("\\s+")).filter(winning::contains).count();
-        });
+        int winStart = input.indexOf(':') + 1;
+        int winEnd = input.indexOf('|', winStart + 3) - 1;
+        int lineLen = input.indexOf('\n', winEnd + 4) + 1;
+        int numWidth = 2;
+        while(input.charAt(winStart + numWidth) == ' ') numWidth++;
+        numWidth++;
+        while(input.charAt(winStart + numWidth) != ' ') numWidth++;
+        int numStart = winEnd + 2;
+        int numCount = (lineLen - numStart) / numWidth;
+
+        int sum = 0;
+        int[] extraCount = new int[input.length() / lineLen];
+        for(int i = 0; i < extraCount.length; i++) {
+            int count = 0;
+            for(int j=0; j<numCount; j++)
+                if(input.indexOf(input.substring(i*lineLen + numStart + j * numWidth, i*lineLen + numStart + (j+1) * numWidth), i*lineLen + winStart, i*lineLen + winEnd) != -1)
+                    count++;
+
+            for(int j=0; j<count; j++)
+                extraCount[i+j+1] += extraCount[i] + 1;
+            sum += extraCount[i] + 1;
+        }
+        return sum;
     }
 }
