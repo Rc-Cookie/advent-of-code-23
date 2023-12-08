@@ -1,56 +1,74 @@
 package de.rccookie.aoc.aoc23;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import de.rccookie.aoc.Solution;
 
 public class Solution8 extends Solution {
 
     @Override
     public Object task1() {
-        Map<String, String[]> network = new HashMap<>();
-        input.lines().skip(2).forEach(line -> {
-            String[] parts = line.split("\\s*=\\s*\\(|,\\s*|\\)");
-            network.put(parts[0], new String[] { parts[1], parts[2] });
-        });
-        boolean[] leftRight = new boolean[linesArr[0].length()];
-        for(int i=0; i<linesArr[0].length(); i++)
-            leftRight[i] = linesArr[0].charAt(i) == 'L';
+        int nodeCount = 0;
+        short[] nodes = new short[800];
+        int[] lookup = new int[26426];
 
-        String cur = "AAA";
+        int pos = input.indexOf('\n');
+        byte[] dirs = new byte[pos];
+        for(int i=0; i<dirs.length; i++)
+            dirs[i] = (byte) (16 - (input.charAt(i) - 'L') / 3 * 8);
+
+        pos += 2;
+        int len = input.length();
+        while(pos < len) {
+            short index = (short) index(input, pos);
+            lookup[index] = index(input, pos + 7) << 16 | index(input, pos + 12);
+            nodes[nodeCount++] = index;
+            pos += 17;
+        }
+
+        pos = 0;
         int count = 0;
         do {
-            int left = leftRight[count % leftRight.length] ? 1 : 0;
-            cur = network.get(cur)[left];
+            pos = (lookup[pos] >> dirs[count % dirs.length]) & 0xFFFF;
             count++;
-        } while(!"ZZZ".equals(cur));
-
+        } while(pos != 26425);
         return count;
     }
 
     @Override
     public Object task2() {
 
-        Map<String, String[]> network = new HashMap<>();
-        input.lines().skip(2).forEach(line -> {
-            String[] parts = line.split("\\s*=\\s*\\(|,\\s*|\\)");
-            network.put(parts[0], new String[] { parts[1], parts[2] });
-        });
-        boolean[] leftRight = new boolean[linesArr[0].length()];
-        for(int i=0; i<linesArr[0].length(); i++)
-            leftRight[i] = linesArr[0].charAt(i) == 'L';
+        int nodeCount = 0;
+        short[] nodes = new short[800];
+        int[] lookup = new int[26426];
 
-        String[] cur = network.keySet().stream().filter(s -> s.endsWith("A")).toArray(String[]::new);
-        long count = 0;
-        do {
-            int left = leftRight[(int) (count % leftRight.length)] ? 1 : 0;
-            for(int i=0; i<cur.length; i++)
-                cur[i] = network.get(cur[i])[left];
-            count++;
-        } while(Arrays.stream(cur).anyMatch(s -> !s.endsWith("Z")));
+        int pos = input.indexOf('\n');
+        byte[] dirs = new byte[pos];
+        for(int i=0; i<dirs.length; i++)
+            dirs[i] = (byte) (16 - (input.charAt(i) - 'L') / 3 * 8);
 
-        return count;
+        pos += 2;
+        int len = input.length();
+        while(pos < len) {
+            short index = (short) index(input, pos);
+            lookup[index] = index(input, pos + 7) << 16 | index(input, pos + 12);
+            nodes[nodeCount++] = index;
+            pos += 17;
+        }
+
+        long prod = dirs.length;
+        for(int i=0; i<nodeCount; i++) {
+            pos = nodes[i];
+            if((pos & 31) != 0) continue;
+            int count = 0;
+            do {
+                pos = (lookup[pos] >> dirs[count % dirs.length]) & 0xFFFF;
+                count++;
+            } while((pos & 31) != 25);
+            prod = prod / dirs.length * count;
+        }
+        return prod;
+    }
+
+    static int index(String str, int start) {
+        return ((str.charAt(start) - 'A') << 10) + ((str.charAt(start+1) - 'A') << 5) + (str.charAt(start+2) - 'A');
     }
 }
