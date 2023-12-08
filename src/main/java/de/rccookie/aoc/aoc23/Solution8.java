@@ -2,12 +2,11 @@ package de.rccookie.aoc.aoc23;
 
 import de.rccookie.aoc.Solution;
 
+@SuppressWarnings("DuplicatedCode")
 public class Solution8 extends Solution {
 
     @Override
     public Object task1() {
-        int nodeCount = 0;
-        short[] nodes = new short[800];
         int[] lookup = new int[26426];
 
         int pos = input.indexOf('\n');
@@ -20,7 +19,6 @@ public class Solution8 extends Solution {
         while(pos < len) {
             short index = (short) index(input, pos);
             lookup[index] = index(input, pos + 7) << 16 | index(input, pos + 12);
-            nodes[nodeCount++] = index;
             pos += 17;
         }
 
