@@ -6,9 +6,15 @@ I am using my [Advent-of-Code-Runner](https://github.com/Rc-Cookie/advent-of-cod
 which automatically downloads input, submits output and generally simplifies development with some
 commonly used helper functions. Feel free to check it out yourself if you are using Java!
 
+My main solutions are (mostly) optimized for performance.
+Thus, they avoid using things like `String.split()` or creating substrings at all, resulting in some 'interesting' looking parsing methods.
+Additionally, I make use of some bit shift magic for some puzzles.
+All of this doesn't really improve readability and also increases size, thus I have started another 'clean' solution, which has its own config file and solution classes.
+They are generally a lot easier to read and use similar algorithms, but are quite a bit slower than the code spagetti.
+
 ## Performance
 
-Some performance stats, which have been obtained using `--all --repeat 100` on my AMD Ryzen 9 5950x:
+Some performance stats of the optimized solutions, which have been obtained using `--all --repeat 100` on my AMD Ryzen 9 5950x:
 
 ```
 Duration (average of 100 runs): 6.288ms
