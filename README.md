@@ -14,30 +14,30 @@ They are generally a lot easier to read and use similar algorithms, but are quit
 
 ## Performance
 
-Some performance stats of the optimized solutions, which have been obtained using `--all --repeat 100` on my AMD Ryzen 9 5950x:
+Some performance stats of the optimized solutions, which have been obtained using `--all --warmup 100 --repeat 100` on my AMD Ryzen 9 5950x:
 
 ```
-Duration (average of 100 runs): 6.288ms
+Duration (average of 100 runs): 3.463ms
 
 ┌───────╥─────────┬─────────┐
 │       ║  Task 1 │  Task 2 │
 ╞═══════╬═════════╪═════════╡
-│ Day 1 ║ 0.617ms │ 0.811ms │
+│ Day 1 ║ 0.332ms │ 0.669ms │
 ├───────╫─────────┼─────────┤
-│ Day 2 ║ 0.990ms │ 0.870ms │
+│ Day 2 ║ 0.479ms │ 0.393ms │
 ├───────╫─────────┼─────────┤
-│ Day 3 ║ 0.209ms │ 0.194ms │
+│ Day 3 ║ 0.143ms │ 0.099ms │
 ├───────╫─────────┼─────────┤
-│ Day 4 ║ 0.249ms │ 0.154ms │
+│ Day 4 ║ 0.176ms │ 0.190ms │
 ├───────╫─────────┼─────────┤
-│ Day 5 ║ 0.247ms │ 0.206ms │
+│ Day 5 ║ 0.057ms │ 0.095ms │
 ├───────╫─────────┼─────────┤
-│ Day 6 ║ 0.005ms │ 0.003ms │
+│ Day 6 ║ 0.004ms │ 0.002ms │
 ├───────╫─────────┼─────────┤
-│ Day 7 ║ 0.352ms │ 0.245ms │
+│ Day 7 ║ 0.180ms │ 0.191ms │
 ├───────╫─────────┼─────────┤
-│ Day 8 ║ 0.115ms │ 0.326ms │
+│ Day 8 ║ 0.091ms │ 0.211ms │
 ├───────╫─────────┼─────────┤
-│ Day 9 ║ 0.345ms │ 0.350ms │
+│ Day 9 ║ 0.091ms │ 0.062ms │
 └───────╨─────────┴─────────┘
 ```
