@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.rccookie.aoc.Solution;
-import de.rccookie.math.Mathf;
-import de.rccookie.util.Console;
 import de.rccookie.util.T2;
 import de.rccookie.util.Tuples;
 
@@ -25,29 +23,7 @@ public class Solution12 extends Solution {
     @Override
     public Object task2() {
         cache.clear();
-        Console.log(Mathf.max(lines, l -> l.replaceAll("[^,]", "").length() + 1));
-        return lines.mapToLong(line -> {
-//            List<Integer> nums = Arrays.stream(line.split(",|\\s")).skip(1).map(Integer::parseInt).toList();
-//            List<Integer> unfolded = new ArrayList<>();
-//            for(int i=0; i<5; i++)
-//                unfolded.addAll(nums);
-//            List<Integer>[] subLists = new List[unfolded.size() + 1];
-//            subLists[0] = unfolded;
-//            for(int i=1; i<subLists.length; i++)
-//                subLists[i] = unfolded.subList(i, unfolded.size());
-//            int[] minSizes = new int[subLists.length];
-//            Arrays.setAll(minSizes, i -> subLists[i].stream().mapToInt(x->x).sum() + subLists[i].size() - 1);
-//            minSizes[minSizes.length-1] = 0;
-//
-//            String str = (line.substring(0, line.indexOf(' '))+"?").repeat(5).substring(0, line.indexOf(' ')*5+4);
-//            String[] substrings = new String[str.length() + 1];
-//            for(int i=0; i<substrings.length; i++)
-//                substrings[i] = str.substring(i);
-//            long res = options(substrings, subLists, minSizes, -1, 0, 0);
-//            Console.map(line, res);
-//            return res;
-            return options(line, 5);
-        }).sum();
+        return lines.mapToLong(line -> options(line, 5)).sum();
     }
 
     private long options(String records, List<Integer> remaining, int active, int pos) {
@@ -101,23 +77,6 @@ public class Solution12 extends Solution {
         long res = calc(records, remaining, minSizes, pos, remainingPos);
         cache.put(t, res);
         return res;
-    }
-
-    static final byte[] MAPPING = new byte[Mathf.max('.', '?', '#') + 1];
-    static {
-        MAPPING['.'] = 0;
-        MAPPING['?'] = 1;
-        MAPPING['#'] = 2;
-    }
-
-    private long hash(String record, int start, int end, List<Integer> remaining) {
-        long h = 0;
-        for(int i=start; i<end; i++)
-            h = 3 * h + MAPPING[record.charAt(i)];
-        h = h << 32;
-        for(int i=0; i<remaining.size(); i++)
-            h |= (long) remaining.get(i) << 5*i;
-        return h;
     }
 
     private long calc(String[] records, List<Integer>[] remaining, int[] minSizes, int pos, int remainingPos) {
@@ -175,7 +134,7 @@ public class Solution12 extends Solution {
         else minSize = minSizes[remainingPos] - minSizes[remainingPos + count] - 1;
 
         int free = range - minSize;
-        return bin(count + free, free);
+        return free < 0 ? 0 : bin(count + free, free);
     }
 
     private static long bin(int n, int k) {
