@@ -49,26 +49,20 @@ public class Solution16 extends Solution {
     }
 
     private int findEnergized(constInt2 start, int dir) {
-        boolean[][][] energized = new boolean[charTable.length][charTable[0].length][4];
+        byte[][] energized = new byte[charTable.length][charTable[0].length];
         followLight(start, dir, energized);
         int count = 0;
-        for(int i=0; i<energized.length; i++) {
-            for(int j=0; j<energized[i].length; j++) {
-                for(int k=0; k<energized[i][j].length; k++) {
-                    if(energized[i][j][k]) {
-                        count++;
-                        break;
-                    }
-                }
-            }
-        }
+        for(int i=0; i<energized.length; i++)
+            for(int j=0; j<energized[i].length; j++)
+                if(energized[i][j] != 0)
+                    count++;
         return count;
     }
 
-    private void followLight(constInt2 start, int dir, boolean[][][] energized) {
+    private void followLight(constInt2 start, int dir, byte[][] energized) {
         int2 pos = start.clone();
-        while(pos.geq(constInt2.zero) && pos.y() < energized.length && pos.x() < energized[0].length && !energized[pos.y()][pos.x()][dir]) {
-            energized[pos.y()][pos.x()][dir] = true;
+        while(pos.geq(constInt2.zero) && pos.y() < energized.length && pos.x() < energized[0].length && (energized[pos.y()][pos.x()] & 1 << dir) == 0) {
+            energized[pos.y()][pos.x()] |= (byte) (1 << dir);
 
             char c = charTable[pos.y()][pos.x()];
             if(c == SPLITTER_FOR_DIR[dir]) {
