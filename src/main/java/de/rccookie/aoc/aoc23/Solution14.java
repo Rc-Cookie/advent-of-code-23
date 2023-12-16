@@ -8,6 +8,8 @@ import java.util.Map;
 
 import de.rccookie.aoc.Solution;
 
+import static de.rccookie.aoc.aoc23.Utils.*;
+
 public class Solution14 extends Solution {
 
     @Override
@@ -33,10 +35,14 @@ public class Solution14 extends Solution {
 
     @Override
     public Object task2() {
-        boolean[][] positions = new boolean[charTable.length][charTable[0].length];
-        for(int i=0; i<positions.length; i++)
-            for(int j=0; j<positions[i].length; j++)
-                positions[i][j] = charTable[i][j] == 'O';
+        int width = charTable[0].length;
+        int height = charTable.length;
+
+        long[] positions = new long[(charTable[0].length * charTable.length + 63) >> 6];
+        for(int x=0; x<width; x++)
+            for(int y=0; y<height; y++)
+                if(charTable[y][x] == 'O')
+                    sbi(positions, x, y, width);
 
         Map<Positions, Integer> dejavu = new HashMap<>();
         List<Positions> positionsInOrder = new ArrayList<>();
@@ -45,125 +51,127 @@ public class Solution14 extends Solution {
             Positions p = new Positions(positions);
             if(dejavu.putIfAbsent(p,i) != null) {
                 int prev = dejavu.get(p);
-                return northLoad(positionsInOrder.get(prev + (1000000000 - i) % (i - prev)).positions);
+                return northLoad(positionsInOrder.get(prev + (1000000000 - i) % (i - prev)).positions, width, height);
             }
             positionsInOrder.add(p);
-            positions = tiltCycle(positions);
+            positions = tiltCycle(positions, width, height);
         }
-        return northLoad(positions);
+        return northLoad(positions, width, height);
     }
 
-    private boolean[][] tiltCycle(boolean[][] positions) {
-        boolean[][] newPositions = tiltNorth(positions);
-        tiltWest(newPositions);
-        tiltSouth(newPositions);
-        tiltEast(newPositions);
+    private long[] tiltCycle(long[] positions, int width, int height) {
+        long[] newPositions = tiltNorth(positions, width, height);
+        tiltWest(newPositions, width, height);
+        tiltSouth(newPositions, width, height);
+        tiltEast(newPositions, width, height);
         return newPositions;
     }
 
-    private boolean[][] tiltNorth(boolean[][] positions) {
-        boolean[][] newPositions = new boolean[positions.length][positions[0].length];
-        for(int j=0; j<positions[0].length; j++) {
+    private void tiltNorthInline(long[] positions, int width, int height) {
+        for(int x=0; x<width; x++) {
             int nextFree = 0;
-            for(int i=0; i<positions.length; i++) {
-                if(charTable[i][j] == '#')
-                    nextFree = i + 1;
-                else if(positions[i][j]) {
-                    newPositions[i][j] = false;
-                    newPositions[nextFree++][j] = true;
+            for(int y=0; y<height; y++) {
+                if(gbi(positions, x, y, width)) {
+                    cbi(positions, x, y, width);
+                    sbi(positions, x, nextFree++, width);
                 }
+                else if(charTable[y][x] == '#')
+                    nextFree = y + 1;
+            }
+        }
+    }
+
+    private long[] tiltNorth(long[] positions, int width, int height) {
+        long[] newPositions = new long[positions.length];
+        for(int x=0; x<width; x++) {
+            int nextFree = 0;
+            for(int y=0; y<height; y++) {
+                if(gbi(positions, x, y, width)) {
+                    cbi(newPositions, x, y, width);
+                    sbi(newPositions, x, nextFree++, width);
+                }
+                else if(charTable[y][x] == '#')
+                    nextFree = y + 1;
             }
         }
         return newPositions;
     }
 
-    private void tiltNorthInplace(boolean[][] positions) {
-        for(int j=0; j<positions[0].length; j++) {
+    private void tiltSouth(long[] positions, int width, int height) {
+        for(int x=0; x<width; x++) {
+            int nextFree = height - 1;
+            for(int y=nextFree; y>=0; y--) {
+                if(gbi(positions, x, y, width)) {
+                    cbi(positions, x, y, width);
+                    sbi(positions, x, nextFree--, width);
+                }
+                else if(charTable[y][x] == '#')
+                    nextFree = y - 1;
+            }
+        }
+    }
+
+    private void tiltWest(long[] positions, int width, int height) {
+        for(int y=0; y<height; y++) {
             int nextFree = 0;
-            for(int i=0; i<positions.length; i++) {
-                if(charTable[i][j] == '#')
-                    nextFree = i + 1;
-                else if(positions[i][j]) {
-                    positions[i][j] = false;
-                    positions[nextFree++][j] = true;
+            for(int x=0; x<width; x++) {
+                if(gbi(positions, x, y, width)) {
+                    cbi(positions, x, y, width);
+                    sbi(positions, nextFree++, y, width);
                 }
+                else if(charTable[y][x] == '#')
+                    nextFree = x + 1;
             }
         }
     }
 
-    private void tiltSouth(boolean[][] positions) {
-        for(int j=0; j<positions[0].length; j++) {
-            int nextFree = positions.length - 1;
-            for(int i=nextFree; i>=0; i--) {
-                if(charTable[i][j] == '#')
-                    nextFree = i - 1;
-                else if(positions[i][j]) {
-                    positions[i][j] = false;
-                    positions[nextFree--][j] = true;
+    private void tiltEast(long[] positions, int width, int height) {
+        for(int y=0; y<height; y++) {
+            int nextFree = width - 1;
+            for(int x=nextFree; x>=0; x--) {
+                if(gbi(positions, x, y, width)) {
+                    cbi(positions, x, y, width);
+                    sbi(positions, nextFree--, y, width);
                 }
+                else if(charTable[y][x] == '#')
+                    nextFree = x - 1;
             }
         }
     }
 
-    private void tiltWest(boolean[][] positions) {
-        for(int i=0; i<positions.length; i++) {
-            int nextFree = 0;
-            for(int j=0; j<positions[i].length; j++) {
-                if(charTable[i][j] == '#')
-                    nextFree = j + 1;
-                else if(positions[i][j]) {
-                    positions[i][j] = false;
-                    positions[i][nextFree++] = true;
-                }
-            }
-        }
-    }
-
-    private void tiltEast(boolean[][] positions) {
-        for(int i=0; i<positions.length; i++) {
-            int nextFree = positions[i].length - 1;
-            for(int j = nextFree; j >= 0; j--) {
-                if(charTable[i][j] == '#')
-                    nextFree = j - 1;
-                else if(positions[i][j]) {
-                    positions[i][j] = false;
-                    positions[i][nextFree--] = true;
-                }
-            }
-        }
-    }
-
-    private int northLoad(boolean[][] positions) {
+    private int northLoad(long[] positions, int width, int height) {
         int load = 0;
-        for(int i=0; i<positions.length; i++)
-            for(int j=0; j<positions[i].length; j++)
-                if(positions[i][j])
-                    load += positions.length - i;
+        for(int y=0; y<height; y++)
+            for(int x=0; x<width; x++)
+                if(gbi(positions, x, y, width))
+                    load += height - y;
         return load;
     }
 
-    private void print(boolean[][] positions) {
-        for(int i=0; i<positions.length; i++) {
-            for(int j=0; j<positions[i].length; j++) {
-                if(charTable[i][j] == '#')
-                    System.out.print('#');
-                else if(positions[i][j])
-                    System.out.print('O');
-                else System.out.print('.');
+    private String toString(long[] positions, int width, int height) {
+        StringBuilder str = new StringBuilder((height + 1) * width);
+        for(int y=0; y<height; y++) {
+            for(int x=0; x<width; x++) {
+                if(gbi(positions, x, y, width))
+                    str.append('O');
+                else if(charTable[y][x] == '#')
+                    str.append('#');
+                else str.append('.');
             }
-            System.out.println();
+            str.append('\n');
         }
+        return str.deleteCharAt(str.length() - 1).toString();
     }
 
-    record Positions(boolean[][] positions) {
+    record Positions(long[] positions) {
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof Positions p && Arrays.deepEquals(positions, p.positions);
+            return obj instanceof Positions p && Arrays.equals(positions, p.positions);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.deepHashCode(positions);
+            return Arrays.hashCode(positions);
         }
     }
 }
