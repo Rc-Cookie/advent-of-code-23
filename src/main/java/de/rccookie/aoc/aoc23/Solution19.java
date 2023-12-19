@@ -1,77 +1,85 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
 import de.rccookie.util.IntWrapper;
 
-public class Solution19 extends Solution {
+@SuppressWarnings("PointlessArithmeticExpression")
+public class Solution19 extends FastSolution {
 
     private static final int[] FIELD_INDEX = new int[26];
     static {
         FIELD_INDEX['x'-'a'] = 0;
         FIELD_INDEX['m'-'a'] = 1;
-        //noinspection PointlessArithmeticExpression
         FIELD_INDEX['a'-'a'] = 2;
         FIELD_INDEX['s'-'a'] = 3;
     }
 
     @Override
     public Object task1() {
-        IntWrapper count = new IntWrapper();
-        long[][] states = parseStates(count);
+        IntWrapper endPos = new IntWrapper();
+        long[][] states = parseStates(endPos);
 
-        long[] parts = new long[linesArr.length - count.value - 1];
-        for(int j=0; j<parts.length; j++)
-            parts[j] = encodePart(linesArr[count.value + 1 + j], 0, linesArr[count.value + 1 + j].length());
+        int pos = endPos.value + 1;
+        long[] parts = new long[count('\n', pos, chars.length)];
 
-        int start = index("in", 0, 2);
+        for(int j=0; j<parts.length; j++) {
+            int eol = eol(pos);
+            parts[j] = encodePart(pos, eol);
+            pos = eol + 1;
+        }
+
+        int start = 8634;
 
         int sum = 0;
-        for(long part : parts) {
-            int state = start;
-            do {
-                for(int i=0; i<states[state].length; i++) {
-                    long instr = states[state][i];
-                    if(i == states[state].length - 1) {
-                        state = (int) instr;
-                        break;
-                    }
-                    else if(lessThan(instr)) {
-                        if((part >> 16*field(instr) & 0xFFFF) < threshold(instr)) {
-                            state = next(instr);
-                            break;
-                        }
-                    }
-                    else if((part >> 16*field(instr) & 0xFFFF) > threshold(instr)) {
+        for(long part : parts)
+            if(simulate(part, start, states) == states.length)
+                sum += (int) ((part & 0xFFFF) + (part >> 16 & 0xFFFF) + (part >> 32 & 0xFFFF) + (part >> 48 & 0xFFFF));
+        return sum;
+    }
+
+    private static int simulate(long part, int start, long[][] states) {
+        int state = start;
+        do {
+            for(int i = 0; i < states[state].length; i++) {
+                long instr = states[state][i];
+                if(i == states[state].length - 1) {
+                    state = (int) instr;
+                    break;
+                }
+                else if(lessThan(instr)) {
+                    if((part >> 16 * field(instr) & 0xFFFF) < threshold(instr)) {
                         state = next(instr);
                         break;
                     }
                 }
-            } while(state < states.length);
-            if(state == states.length)
-                sum += (int) ((part & 0xFFFF) + (part >> 16 & 0xFFFF) + (part >> 32 & 0xFFFF) + (part >> 48 & 0xFFFF));
-        }
-        return sum;
+                else if((part >> 16 * field(instr) & 0xFFFF) > threshold(instr)) {
+                    state = next(instr);
+                    break;
+                }
+            }
+        } while(state < states.length);
+        return state;
     }
 
     @Override
     public Object task2() {
-        return getSum(parseStates(null), index("in", 0, 2), 1, 4000, 1, 4000, 1, 4000, 1, 4000);
+        return getSum(parseStates(null), 8634, 1, 4000, 1, 4000, 1, 4000, 1, 4000);
     }
 
-    private long[][] parseStates(IntWrapper count) {
+    private long[][] parseStates(IntWrapper endPos) {
         long[][] states = new long[26*32*32][];
-        int i = 0;
-        for(; i<linesArr.length; i++) {
-            if(linesArr[i].isBlank()) break;
-            int state = index(linesArr[i], 0, linesArr[i].indexOf('{'));
-            String[] parts = linesArr[i].substring(linesArr[i].indexOf('{')+1, linesArr[i].length() - 1).split(",");
-            states[state] = new long[parts.length];
-            for(int j = 0; j < parts.length - 1; j++)
-                states[state][j] = encodeInstr(parts[j], 0, parts[j].length());
-            states[state][parts.length - 1] = index(parts[parts.length - 1], 0, parts[parts.length - 1].length());
+        int pos = 0;
+        while(chars[pos] != '\n') {
+            int state = index(pos, pos = indexOf('{', pos + 2));
+            pos++;
+            int eol = eol(pos+2);
+            states[state] = new long[count(',', pos+5, eol-1) + 1];
+            for(int i=0; i<states[state].length-1; i++)
+                states[state][i] = encodeInstr(pos, (pos = indexOf(',', pos) + 1) - 1);
+            states[state][states[state].length-1] = index(pos, eol-1);
+            pos = eol + 1;
         }
-        if(count != null)
-            count.value = i;
+        if(endPos != null)
+            endPos.value = pos;
         return states;
     }
 
@@ -165,23 +173,23 @@ public class Solution19 extends Solution {
         return sum + getSum(states, (int) states[state][states[state].length-1], min0, max0, min1, max1, min2, max2, min3, max3);
     }
 
-    private static int index(String str, int start, int end) {
+    private int index(int start, int end) {
         if(end == start + 1)
-            return 26*32*32 + (str.charAt(start) == 'A' ? 0 : 1);
-        return (str.charAt(start) - 'a') << 10 | (str.charAt(start+1) - 'a') << 5 | (end == start + 2 ? 26 : (str.charAt(start+2) - 'a'));
+            return 26*32*32 + (chars[start] == 'A' ? 0 : 1);
+        return (chars[start] - 'a') << 10 | (chars[start+1] - 'a') << 5 | (end == start + 2 ? 26 : (chars[start+2] - 'a'));
     }
 
-    private static long encodeInstr(String instr, int start, int end) {
-        int colon = instr.indexOf(':', start, end);
-        return (long) index(instr, colon+1, end) << 33 | (long) (instr.charAt(start+1)-'<') << 31 | Long.parseLong(instr, start + 2, colon, 10) << 2 | FIELD_INDEX[instr.charAt(start)-'a'];
+    private long encodeInstr(int start, int end) {
+        int colon = indexOf(':', start, end);
+        return (long) index(colon+1, end) << 33 | (long) (chars[start+1]-'<') << 31 | parseULong(start + 2, colon) << 2 | FIELD_INDEX[chars[start]-'a'];
     }
 
-    private static long encodePart(String part, int start, int end) {
-        int comma1 = part.indexOf(',', start, end), comma2 = part.indexOf(',', comma1+3, end), comma3 = part.indexOf(',', comma2+3, end);
-        return Long.parseLong(part, start+3, comma1, 10) |
-               Long.parseLong(part, comma1+3, comma2, 10) << 16 |
-               Long.parseLong(part, comma2+3, comma3, 10) << 32 |
-               Long.parseLong(part, comma3+3, end-1, 10) << 48;
+    private long encodePart(int start, int end) {
+        int comma1 = indexOf(',', start, end), comma2 = indexOf(',', comma1+3, end), comma3 = indexOf(',', comma2+3, end);
+        return parseULong(start+3, comma1) |
+               parseULong(comma1+3, comma2) << 16 |
+               parseULong(comma2+3, comma3) << 32 |
+               parseULong(comma3+3, end-1) << 48;
     }
 
     private static int field(long instr) {
@@ -198,11 +206,5 @@ public class Solution19 extends Solution {
 
     private static int next(long instr) {
         return (int) (instr >> 33);
-    }
-
-    private static String state(int index) {
-        if(index == 26*32*32) return "A";
-        if(index == 26*32*32 + 1) return "R";
-        return "" + (char) ((index >> 10 & 31) + 'a') + (char) ((index >> 5 & 31) + 'a') + ((index & 31) == 26 ? "" : "" + (char) ((index & 31) + 'a'));
     }
 }
