@@ -6,11 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.rccookie.aoc.Solution;
-
-import static de.rccookie.aoc.aoc23.Utils.*;
-
-public class Solution14 extends Solution {
+public class Solution14 extends FastSolution {
 
     @Override
     public Object task1() {

@@ -1,9 +1,7 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
-
 @SuppressWarnings("DuplicatedCode")
-public class Solution9 extends Solution {
+public class Solution9 extends FastSolution {
 
     @Override
     public Object task1() {

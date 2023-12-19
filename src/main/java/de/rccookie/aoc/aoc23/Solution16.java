@@ -1,15 +1,12 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
 import de.rccookie.math.Mathf;
+import de.rccookie.util.Utils;
 import sun.misc.Unsafe;
 
-import static de.rccookie.aoc.aoc23.Utils.gbi;
-import static de.rccookie.aoc.aoc23.Utils.sbi;
+public class Solution16 extends FastSolution {
 
-public class Solution16 extends Solution {
-
-    private static final Unsafe UNSAFE = (Unsafe) de.rccookie.util.Utils.getField(Unsafe.class, "theUnsafe");
+    private static final Unsafe UNSAFE = (Unsafe) Utils.getField(Unsafe.class, "theUnsafe");
     private static final long ARR_OFF = UNSAFE.arrayBaseOffset(long[].class);
 
     private static final byte RIGHT = 0;

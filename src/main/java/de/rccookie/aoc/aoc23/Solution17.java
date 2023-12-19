@@ -8,7 +8,7 @@ import de.rccookie.graph.BinaryHeap;
 import de.rccookie.graph.Heap;
 import de.rccookie.util.Console;
 
-public class Solution17 extends Solution {
+public class Solution17 extends FastSolution {
 
     @Override
     public Object task1() {

@@ -2,9 +2,7 @@ package de.rccookie.aoc.aoc23;
 
 import java.util.Arrays;
 
-import de.rccookie.aoc.Solution;
-
-public class Solution11 extends Solution {
+public class Solution11 extends FastSolution {
 
     @Override
     public Object task1() {

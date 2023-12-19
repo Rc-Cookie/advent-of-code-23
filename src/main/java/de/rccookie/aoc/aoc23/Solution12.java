@@ -6,11 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.rccookie.aoc.Solution;
 import de.rccookie.util.T2;
 import de.rccookie.util.Tuples;
 
-public class Solution12 extends Solution {
+public class Solution12 extends FastSolution {
 
     private final Map<T2<String, List<Integer>>, Long> cache = new HashMap<>();
 

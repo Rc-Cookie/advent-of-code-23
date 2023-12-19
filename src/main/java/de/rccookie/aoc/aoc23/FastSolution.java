@@ -4,15 +4,15 @@ import de.rccookie.aoc.Solution;
 
 public abstract class FastSolution extends Solution {
 
-    private static final int[] CHAR_VAL = new int[128];
+    protected static final int[] CHAR_VALUE = new int[128];
     private static final boolean[] IS_HEX = new boolean[128];
     static {
         for(int i=0; i<10; i++) {
-            CHAR_VAL['0'+i] = i;
+            CHAR_VALUE['0' + i] = i;
             IS_HEX['0'+i] = true;
         }
         for(int i=0; i<26; i++) {
-            CHAR_VAL['a'+i] = CHAR_VAL['A'+i] = 10+i;
+            CHAR_VALUE['a' + i] = CHAR_VALUE['A' + i] = 10 + i;
             IS_HEX['a'+i] = IS_HEX['A'+i] = i < 6;
         }
     }
@@ -59,7 +59,7 @@ public abstract class FastSolution extends Solution {
     public final int parseUIntHex(int from, int to) {
         int x = 0;
         for(; from<to; from++)
-            x = x << 4 | CHAR_VAL[chars[from]];
+            x = x << 4 | CHAR_VALUE[chars[from]];
         return x;
     }
 
@@ -87,7 +87,7 @@ public abstract class FastSolution extends Solution {
     public final long parseULongHex(int from, int to) {
         long x = 0;
         for(; from<to; from++)
-            x = x << 4 | CHAR_VAL[chars[from]];
+            x = x << 4 | CHAR_VALUE[chars[from]];
         return x;
     }
 

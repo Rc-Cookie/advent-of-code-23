@@ -1,8 +1,6 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
-
-public class Solution6 extends Solution {
+public class Solution6 extends FastSolution {
 
     @Override
     public Object task1() {

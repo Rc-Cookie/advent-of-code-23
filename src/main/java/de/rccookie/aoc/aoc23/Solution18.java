@@ -1,8 +1,6 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
-
-public class Solution18 extends Solution {
+public class Solution18 extends FastSolution {
 
     private static final int[] DIRS_X = new int[128];
     private static final int[] DIRS_Y = new int[128];
@@ -11,13 +9,6 @@ public class Solution18 extends Solution {
         DIRS_Y['1'] = DIRS_Y['D'] = 1;
         DIRS_X['2'] = DIRS_X['L'] = -1;
         DIRS_Y['3'] = DIRS_Y['U'] = -1;
-    }
-    private static final int[] CHAR_VAL = new int[128];
-    static {
-        for(int i=0; i<10; i++)
-            CHAR_VAL['0'+i] = i;
-        for(int i=0; i<6; i++)
-            CHAR_VAL['A'+i] = CHAR_VAL['a'+i] = 10+i;
     }
 
     @Override
@@ -31,9 +22,9 @@ public class Solution18 extends Solution {
         do {
             char c = chars[pos];
             pos += 2;
-            int len = CHAR_VAL[chars[pos]];
+            int len = CHAR_VALUE[chars[pos]];
             if(chars[pos+1] != ' ')
-                len = 10 * len + CHAR_VAL[chars[++pos]];
+                len = 10 * len + CHAR_VALUE[chars[++pos]];
             perimeter += len;
 
             int x = lastX + DIRS_X[c] * len;
@@ -59,7 +50,7 @@ public class Solution18 extends Solution {
         do {
             pos += 6;
             if(chars[pos] == '#') pos++;
-            int len = CHAR_VAL[chars[pos]] << 16 | CHAR_VAL[chars[pos+1]] << 12 | CHAR_VAL[chars[pos+2]] << 8 | CHAR_VAL[chars[pos+3]] << 4 | CHAR_VAL[chars[pos+4]];
+            int len = CHAR_VALUE[chars[pos]] << 16 | CHAR_VALUE[chars[pos+1]] << 12 | CHAR_VALUE[chars[pos+2]] << 8 | CHAR_VALUE[chars[pos+3]] << 4 | CHAR_VALUE[chars[pos+4]];
             perimeter += len;
 
             int x = lastX + DIRS_X[chars[pos+5]] * len;

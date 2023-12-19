@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import de.rccookie.aoc.Solution;
 import de.rccookie.math.Mathf;
 
-public class Solution5 extends Solution {
+public class Solution5 extends FastSolution {
 
     @Override
     public void load() {

@@ -1,8 +1,6 @@
 package de.rccookie.aoc.aoc23;
 
-import de.rccookie.aoc.Solution;
-
-public class Solution10 extends Solution {
+public class Solution10 extends FastSolution {
 
     private static final byte LEFT = 0;
     private static final byte UP = 1;

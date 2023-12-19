@@ -3,9 +3,7 @@ package de.rccookie.aoc.aoc23;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.rccookie.aoc.Solution;
-
-public class Solution1 extends Solution {
+public class Solution1 extends FastSolution {
 
     @Override
     public Object task1() {

@@ -4,11 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.rccookie.aoc.Solution;
 import de.rccookie.math.constInt3;
 import de.rccookie.math.int3;
 
-public class Solution2 extends Solution {
+public class Solution2 extends FastSolution {
 
     private static final List<String> NAMES = List.of("red", "green", "blue");
     private static final constInt3 MAX_COUNTS = new int3(12, 13, 14);
