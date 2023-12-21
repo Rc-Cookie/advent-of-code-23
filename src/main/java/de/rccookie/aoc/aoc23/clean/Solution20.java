@@ -15,7 +15,6 @@ import de.rccookie.graph.DoublyLinkedGraph;
 import de.rccookie.graph.Graphs;
 import de.rccookie.graph.MapGraph;
 import de.rccookie.graph.ReadableGraph;
-import de.rccookie.util.Console;
 import de.rccookie.util.T2;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,7 +73,6 @@ public class Solution20 extends Solution {
                     }
                 }
             }
-            Console.map(start, count);
             counts.add(count);
         }
 
